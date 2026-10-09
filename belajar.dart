@@ -83,8 +83,127 @@ void main(){
          return;
        }
 
+        var index = keranjang.indexWhere((item) => item ['nama'] == pilih_k);
+        if (index != -1) {
+            keranjang[index]['jumlah'] += jumlah_barang;
+        } else {
+            keranjang.add({'nama': pilih_k, 'harga': katalog[pilih_k], 'jumlah': jumlah_barang});
+        }
+        print('$jumlah_barang $pilih_k berhasil dimasukkan ke keranjang!');
+    }
 
-        // keranjang.add();
+    void lihat_keranjang() {
+      if (keranjang.isEmpty) {
+        print('Keranjang anda masih kosong!');
+        return;
+      }
+
+      int total = 0;
+
+      print('\n========== ISI KERANJANG ==========');
+
+      for (int i = 0; i < keranjang.length; i++) {
+        var item = keranjang[i];
+
+        int harga = item['harga'] as int;
+        int jumlah = item['jumlah'] as int;
+        int subtotal = harga * jumlah;
+
+        total += subtotal;
+
+        print('${i + 1}. ${item['nama']}');
+        print('   Harga satuan : Rp$harga');
+        print('   Jumlah       : $jumlah');
+        print('   Subtotal     : Rp$subtotal');
+        print('-----------------------------------');
+      }
+
+      print('TOTAL BELANJA: Rp$total');
+      print('===================================');
+    }
+
+    void hapus_barang() {
+      if (keranjang.isEmpty) {
+        print('Keranjang anda masih kosong!');
+        return;
+      }
+
+      lihat_keranjang();
+
+      stdout.write('Pilih nomor barang yang ingin dihapus: ');
+      var input = int.tryParse(stdin.readLineSync()!);
+
+      if (input == null || input < 1 || input > keranjang.length) {
+        print('Nomor barang tidak valid!');
+        return;
+      }
+
+      var barangDihapus = keranjang.removeAt(input - 1);
+
+      print('${barangDihapus['nama']} berhasil dihapus!');
+    }
+
+    void checkout() {
+      if (keranjang.isEmpty) {
+        print('Keranjang anda masih kosong!');
+        return;
+      }
+
+      while (true) {
+        print('\n========== MENU CHECKOUT ==========');
+        lihat_keranjang();
+
+        print('1. Checkout sekarang');
+        print('2. Hapus barang');
+        print('3. Kembali ke menu utama');
+
+        stdout.write('Pilih menu: ');
+        var pilihan = int.tryParse(stdin.readLineSync()!);
+
+        if (pilihan == 1) {
+          int total = 0;
+
+          for (var item in keranjang) {
+            total += (item['harga'] as int) *
+                (item['jumlah'] as int);
+          }
+
+          print('Total belanja: Rp$total');
+          print('Saldo saat ini: Rp$saldo');
+
+          if (saldo < total) {
+            print('Saldo tidak mencukupi!');
+            print('Silakan top up terlebih dahulu.');
+            return;
+          }
+
+          stdout.write('Yakin ingin checkout? (y/n): ');
+          var konfirmasi = stdin.readLineSync()!.toLowerCase();
+
+          if (konfirmasi != 'y') {
+            print('Checkout dibatalkan.');
+            continue;
+          }
+
+          saldo -= total;
+
+          print('Checkout berhasil!');
+          print('Total pembayaran: Rp$total');
+          print('Sisa saldo: Rp$saldo');
+
+          keranjang.clear();
+          return;
+
+        } else if (pilihan == 2) {
+          hapus_barang();
+
+        } else if (pilihan == 3) {
+          return;
+
+        } else {
+          print('Pilihan tidak valid!');
+        }
+      }
     }
 
     void topup(){
@@ -130,7 +249,7 @@ void main(){
                 topup();
                 break;
               case 4:
-
+                checkout();
                 break;
               case 5:
                 keluar();
